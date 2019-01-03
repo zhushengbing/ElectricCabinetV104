@@ -2,6 +2,7 @@
 #include "bsp_dev.h"
 #include "bsp_func.h"
 #include "bsp_eeprom.h"
+#include "string.h"
 
 #define DIFF_MAX  5
 
@@ -15,7 +16,7 @@ static uint8_t Next_GetHot_Status = 0xFF, Pre_GetHot_Status = 0xFF;
 
 void Bsp_Function_PutHot_Speed(uint8_t diff_t, uint8_t *speed)
 {
-  if( (Device_Params_Info.RT_Water + diff_t) <= Device_Params_Info.EEPROM_Data.TT_Water )
+  if( (Device_Params_Info.RT_OutWater + diff_t) <= Device_Params_Info.EEPROM_Data.TT_Water )
   {
     if(Device_Params_Info.PutHotSpeed != *speed)
     {
@@ -24,6 +25,8 @@ void Bsp_Function_PutHot_Speed(uint8_t diff_t, uint8_t *speed)
       else
         Device_Params_Info.Debunce.cPutHotSpeed++;
     }
+		else
+			Device_Params_Info.Debunce.cPutHotSpeed = 0;
   }
   else
     Device_Params_Info.Debunce.cPutHotSpeed = 0;
@@ -43,7 +46,7 @@ void Bsp_Func_PutHot_Process(void)
     Device_Params_Info.PutHotActive = 1;
   }
   
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHot_Bit == 0 || Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit)
+	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHot_Bit == 0 || Device_Params_Info.AlarmPutHot)
 	{
     Device_Params_Info.PutHotActive = 0;
 		Device_Params_Info.PutHotSpeed = 0;
@@ -64,7 +67,7 @@ void Bsp_Func_PutHot_Process(void)
   }
   else
   {
-    if( (Device_Params_Info.RT_Water+DIFF_MAX) < Device_Params_Info.EEPROM_Data.TT_Water )
+    if( (Device_Params_Info.RT_OutWater+DIFF_MAX) < Device_Params_Info.EEPROM_Data.TT_Water )
     {
       Device_Params_Info.PutHotActive = 1;
     }
@@ -84,7 +87,7 @@ void Bsp_Func_GetHot_Process(void)
 		Device_Params_Info.GetHotSpeed = 0;
 		return;
 	}
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit)
+	if(Device_Params_Info.AlarmGetHot)
 	{
 		Device_Params_Info.GetHotSpeed = 0;
 		return;
@@ -159,7 +162,7 @@ void Bsp_MainFunc_Process(void)
 		default:break;
 	}
 	
-	if( Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit || Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHot_Bit)
+	if( Device_Params_Info.AlarmPutHot || Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHot_Bit)
 		MOTOR_WATER_GPIO_Port->ODR |= MOTOR_WATER_Pin;
 	else
 		MOTOR_WATER_GPIO_Port->ODR &= ~MOTOR_WATER_Pin;
@@ -180,23 +183,37 @@ void Bsp_Func_GetRealTime(void)
 	Bsp_DWIN_GetRealTime();
 }
 
+int Bsp_Func_Timer_Clock(struct Timing_Event_Tags* ptimer)
+{
+	uint8_t hour;
+	uint8_t minute;
+#if TIMER_WEEK
+	uint8_t week;
+	if(Device_Params_Info.RTCInfo.Week == 0)
+    week = 6;
+  else
+    week = Device_Params_Info.RTCInfo.Week - 1;
+  if( ((Device_Params_Info.EEPROM_Data.Timer_Bucket.All >> week ) & 0x01) == 0 )return -1;
+#endif
+  hour = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Hour);
+  minute = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Minute);
+  if( hour != ptimer->Hour)return -1;
+	if( minute != ptimer->Minute)return -1;
+	return 0;
+}
+
 void Bsp_Func_PutHotTimer_ON(void)
 {
-  uint8_t hour, minute, week;
   struct Timing_Event_Tags* pTimer_ON = &Device_Params_Info.EEPROM_Data.PutHotTiming_ON;
   struct Timing_Event_Tags* pTimer_OFF = &Device_Params_Info.EEPROM_Data.PutHotTiming_OFF;
   if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHotTiming_Bit == 0)return;
   if(pTimer_ON->Hour == pTimer_OFF->Hour &&\
      pTimer_ON->Minute == pTimer_OFF->Minute)return;
-  if(Device_Params_Info.RTCInfo.Week == 0)
-    week = 6;
-  else
-    week = Device_Params_Info.RTCInfo.Week - 1;
-  if( ((Device_Params_Info.EEPROM_Data.Timing_Week >> week ) & 0x01) == 0 )return;
-  hour = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Hour);
-  minute = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Minute);
-  if( hour != pTimer_ON->Hour){active_puthot[0] = 1;return;}
-	if( minute != pTimer_ON->Minute){active_puthot[0] = 1;return;}
+	if(Bsp_Func_Timer_Clock(pTimer_ON) == -1)
+	{
+		active_puthot[0] = 1;
+		return;
+	}
   if(active_puthot[0] != 0)
   {
     active_puthot[0] = 0;
@@ -206,16 +223,16 @@ void Bsp_Func_PutHotTimer_ON(void)
 
 void Bsp_Func_PutHotTimer_OFF(void)
 {
-  uint8_t hour, minute;
   struct Timing_Event_Tags* pTimer_ON = &Device_Params_Info.EEPROM_Data.PutHotTiming_ON;
   struct Timing_Event_Tags* pTimer_OFF = &Device_Params_Info.EEPROM_Data.PutHotTiming_OFF;
   if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHotTiming_Bit == 0)return;
   if(pTimer_ON->Hour == pTimer_OFF->Hour &&\
      pTimer_ON->Minute == pTimer_OFF->Minute)return;
-  hour = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Hour);
-  minute = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Minute);
-  if( hour != pTimer_OFF->Hour){active_puthot[1] = 1;return;}
-	if( minute != pTimer_OFF->Minute){active_puthot[1] = 1;return;}
+	if(Bsp_Func_Timer_Clock(pTimer_OFF) == -1)
+	{
+		active_puthot[1] = 1;
+		return;
+	}
   if(active_puthot[1] != 0)
   {
     Device_Params_Info.EEPROM_Data.Device_Status.Bit.PutHot_Bit = 0;
@@ -232,23 +249,20 @@ struct Timing_Event_Tags *GetHot_Timer_Table[3][2] =
 
 void Bsp_Func_GetHotTimer_ON(uint8_t timer)
 {
-  uint8_t hour, minute, week;
   uint8_t active_index = timer<<1;
   struct Timing_Event_Tags* pTimer_ON = GetHot_Timer_Table[timer][0];
   struct Timing_Event_Tags* pTimer_OFF = GetHot_Timer_Table[timer][1];
   if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotTiming_Bit == 0)return;
-  if(((Device_Params_Info.EEPROM_Data.Timing_Week>>7)&(0x01<<timer)) == 0)return;
+  if(((Device_Params_Info.EEPROM_Data.Timer_Bucket.All>>7)&(0x01<<timer)) == 0)return;
   if(pTimer_ON->Hour == pTimer_OFF->Hour &&\
      pTimer_ON->Minute == pTimer_OFF->Minute)return;
-  if(Device_Params_Info.RTCInfo.Week == 0)
-    week = 6;
-  else
-    week = Device_Params_Info.RTCInfo.Week - 1;
-  if( ((Device_Params_Info.EEPROM_Data.Timing_Week >> week ) & 0x01) == 0 )return;
-  hour = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Hour);
-  minute = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Minute);
-  if( hour != pTimer_ON->Hour){active_gethot[active_index] = 1;return;}
-	if( minute != pTimer_ON->Minute){active_gethot[active_index] = 1;return;}
+	
+	if(Bsp_Func_Timer_Clock(pTimer_ON) == -1)
+	{
+		active_gethot[active_index] = 1;
+		return;
+	}
+	
   if(active_gethot[active_index] != 0)
   {
     active_gethot[active_index] = 0;
@@ -259,24 +273,22 @@ void Bsp_Func_GetHotTimer_ON(uint8_t timer)
 
 void Bsp_Func_GetHotTimer_OFF(uint8_t timer)
 {
-  uint8_t hour, minute;
   uint8_t active_index = 1 + (timer<<1);
   struct Timing_Event_Tags* pTimer_ON = GetHot_Timer_Table[timer][0];
   struct Timing_Event_Tags* pTimer_OFF = GetHot_Timer_Table[timer][1];
-  if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotTiming_Bit == 0)return;
-  if(((Device_Params_Info.EEPROM_Data.Timing_Week>>7)&(0x01<<timer)) == 0)return;
+	
+	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotTiming_Bit == 0)return;
+  if(((Device_Params_Info.EEPROM_Data.Timer_Bucket.All>>7)&(0x01<<timer)) == 0)return;
   if(pTimer_ON->Hour == pTimer_OFF->Hour &&\
      pTimer_ON->Minute == pTimer_OFF->Minute)return;
-//  if(Device_Params_Info.RTCInfo.Week == 0)
-//    week = 6;
-//  else
-//    week = Device_Params_Info.RTCInfo.Week - 1;
-//  if( ((Device_Params_Info.EEPROM_Data.Timing_Week >> week ) & 0x01) == 0 )return;
-  hour = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Hour);
-  minute = Bsp_DWIN_BCD_Data(Device_Params_Info.RTCInfo.Minute);
-  if( hour != pTimer_OFF->Hour){active_gethot[active_index] = 1;return;}
-	if( minute != pTimer_OFF->Minute){active_gethot[active_index] = 1;return;}
-  if(active_gethot[active_index] != 0)
+	
+	if(Bsp_Func_Timer_Clock(pTimer_OFF) == -1)
+	{
+		active_gethot[active_index] = 1;
+		return;
+	}
+	
+	if(active_gethot[active_index] != 0)
   {
     active_gethot[active_index] = 0;
     Next_GetHot_Status = 0;
@@ -318,28 +330,28 @@ void Bsp_Func_Timer(void)
 void Bsp_Func_Alarm_Process(void)
 {
 	uint16_t max_air;
-	/*·ÅÈÈ±£»¤¼ì²â*/
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit == 0)
+	/*æ”¾çƒ­ä¿æŠ¤æ£€æµ‹*/
+	if(Device_Params_Info.AlarmPutHot == 0)
 	{
-		if( Device_Params_Info.RT_Water > Device_Params_Info.EEPROM_Data.TT_Water )
-			Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit = 1;
+		if( Device_Params_Info.RT_OutWater > Device_Params_Info.EEPROM_Data.TT_Water )
+			Device_Params_Info.AlarmPutHot = 1;
 	}
 	else
 	{
-		if( Device_Params_Info.RT_Water < Device_Params_Info.EEPROM_Data.TT_Water )
+		if( Device_Params_Info.RT_OutWater < Device_Params_Info.EEPROM_Data.TT_Water )
     {
       if(Device_Params_Info.Debunce.cPutHotAlarm < 5)
         Device_Params_Info.Debunce.cPutHotAlarm ++;
       else
-        Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit = 0;
+        Device_Params_Info.AlarmPutHot = 0;
     }
     else
       Device_Params_Info.Debunce.cPutHotAlarm = 0;
 	}
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit == 0)
-		 Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmPutHot_Bit = HAL_GPIO_ReadPin(ALARM_WATER_GPIO_Port,ALARM_WATER_Pin);
+	if(Device_Params_Info.AlarmPutHot == 0)
+		 Device_Params_Info.AlarmPutHot = HAL_GPIO_ReadPin(ALARM_WATER_GPIO_Port,ALARM_WATER_Pin);
 	
-	//ÐîÈÈ±£»¤¼ì²â
+	//è“„çƒ­ä¿æŠ¤æ£€æµ‹
 	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotLevel_Bit == 2)
 		max_air = Device_Params_Info.EEPROM_Data.MT_Air;
 	else if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotLevel_Bit == 1)
@@ -347,10 +359,10 @@ void Bsp_Func_Alarm_Process(void)
 	else if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.GetHotLevel_Bit == 0)
 		max_air = 350;
 	
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit == 0)
+	if(Device_Params_Info.AlarmGetHot == 0)
 	{
 		if(Device_Params_Info.RT_Air > max_air)
-			Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit = 1;
+			Device_Params_Info.AlarmGetHot = 1;
 	}
 	else
 	{
@@ -359,13 +371,13 @@ void Bsp_Func_Alarm_Process(void)
       if(Device_Params_Info.Debunce.cGetHotAlarm < 5)
         Device_Params_Info.Debunce.cGetHotAlarm ++;
       else
-        Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit = 0;
+        Device_Params_Info.AlarmGetHot = 0;
     }
     else
       Device_Params_Info.Debunce.cGetHotAlarm = 0;
 	}
-	if(Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit == 0)
-		 Device_Params_Info.EEPROM_Data.Device_Status.Bit.AlarmGetHot_Bit = HAL_GPIO_ReadPin(ALARM_HEAT_GPIO_Port,ALARM_HEAT_Pin);
+	if(Device_Params_Info.AlarmGetHot == 0)
+		 Device_Params_Info.AlarmGetHot = HAL_GPIO_ReadPin(ALARM_HEAT_GPIO_Port,ALARM_HEAT_Pin);
 
   if(Device_Params_Info.Special_Mode.Enable)
   {
@@ -412,9 +424,37 @@ void Bsp_Func_Special_Mode(void)
   }
 }
 
-void Bsp_Func_EEPROM_Update(void)
+void Bsp_Fuc_EEPROM_Write(void* pdata, uint8_t bytes)
 {
-  if(Device_Params_Info.EEPROM_Update == 0)return;
-  Device_Params_Info.EEPROM_Update = 0;
-  EEPROM_Write((uint8_t*)&Device_Params_Info.EEPROM_Data.EEPROM_Key, 0, sizeof(struct EEPROM_Data_Tags));
+	uint8_t offset = (uint32_t)pdata - (uint32_t)&Device_Params_Info.EEPROM_Data.EEPROM_Key;
+	
+	EEPROM_Write((uint8_t*)pdata, offset, bytes);
+}
+
+struct EEPROM_Data_Tags CurEEPROM_Data;
+
+void Bsp_Func_EEPROM_Update(void)
+{	
+	uint8_t *pCurEEPROM, *pNextEEPROM;
+	uint8_t i;
+	
+	pNextEEPROM = (uint8_t*)&Device_Params_Info.EEPROM_Data;
+	pCurEEPROM = (uint8_t*)&CurEEPROM_Data;
+	
+	if(CurEEPROM_Data.EEPROM_Key != Device_Params_Info.EEPROM_Data.EEPROM_Key)
+	{
+		memcpy(&CurEEPROM_Data, &Device_Params_Info.EEPROM_Data, sizeof(struct EEPROM_Data_Tags));
+		return ;
+	}
+	
+	for(i=0; i<sizeof(struct EEPROM_Data_Tags); i++)
+	{
+		if(*pCurEEPROM != *pNextEEPROM)
+		{
+			*pCurEEPROM = *pNextEEPROM;
+			Bsp_Fuc_EEPROM_Write(pNextEEPROM, 1);
+		}
+		pNextEEPROM++;
+		pCurEEPROM++;
+	}
 }

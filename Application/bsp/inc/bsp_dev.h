@@ -24,9 +24,23 @@ union Device_Status_Tag
 		uint8_t PutHot_Bit            :1;
 		uint8_t GetHotTiming_Bit      :1;
 		uint8_t PutHotTiming_Bit      :1;
-		uint8_t AlarmPutHot_Bit       :1;
-		uint8_t AlarmGetHot_Bit       :1;
 		uint8_t GetHotLevel_Bit       :2;
+	}Bit;
+	uint16_t All;
+};
+
+union Timing_Bucket_Tags
+{
+	struct
+	{
+	#if TIMER_WEEK
+		uint8_t Week    :7;
+	#else
+		uint8_t _none_  :7;
+	#endif	
+		uint8_t Timer1  :1;
+		uint8_t Timer2  :1;
+		uint8_t Timer3  :1;
 	}Bit;
 	uint16_t All;
 };
@@ -43,14 +57,14 @@ struct EEPROM_Data_Tags
 {
 		uint32_t                  EEPROM_Key;
     union Device_Status_Tag   Device_Status;
-		uint16_t                  TT_Water; //Ä¿±êË®ÎÂ 
-		uint16_t                  MT_Water; //×î¸ßË®ÎÂ
-		uint16_t                  MT_Air;   //¹ñÄÚ×î¸ßÎÂ¶È
+		uint16_t                  TT_Water; //ç›®æ ‡æ°´æ¸© 
+		uint16_t                  MT_Water; //æœ€é«˜æ°´æ¸©
+		uint16_t                  MT_Air;   //æŸœå†…æœ€é«˜æ¸©åº¦
 		struct Timing_Event_Tags  GetHotTiming_ON[3];
 		struct Timing_Event_Tags  GetHotTiming_OFF[3];
     struct Timing_Event_Tags  PutHotTiming_ON;
     struct Timing_Event_Tags  PutHotTiming_OFF;
-		uint16_t 					        Timing_Week;
+		union Timing_Bucket_Tags  Timer_Bucket;
 };
 
 struct Debounce_Count_Tags
@@ -70,16 +84,18 @@ struct Special_Mode_Tags
 struct Dev_Params_Tags
 {
 	struct EEPROM_Data_Tags    EEPROM_Data;
-	uint8_t                    EEPROM_Update;
 	char                       PassWord[16];
 	struct PageGUI_Tags        Page_Info;
 	struct RTC_Info_Tags       RTCInfo;
-	uint16_t                   RT_Water; //Ë®ÎÂ
-	uint16_t                   RT_Air;   //¹ñÄÚ¿ÕÆøÎÂ¶È
-	uint16_t                   PreTiming_Week;
+	uint16_t                   RT_InWater; 
+	uint16_t                   RT_OutWater;//æ°´æ¸©
+	uint16_t                   RT_Air;   //æŸœå†…ç©ºæ°”æ¸©åº¦
+	uint8_t                    AlarmPutHot;
+	uint8_t                    AlarmGetHot;
   uint8_t                    PutHotActive;
 	uint8_t                    PutHotSpeed;
 	uint8_t                    GetHotSpeed;
+	union Timing_Bucket_Tags   PreTimer_Bucket;
   struct Debounce_Count_Tags Debunce;
   struct Special_Mode_Tags   Special_Mode;
 };

@@ -438,14 +438,19 @@
               <FilePath>..\Application\bsp\src\bsp_dwin.c</FilePath>
             </File>
             <File>
+              <FileName>bsp_sensor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\bsp\src\bsp_sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_max6675.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\bsp\src\bsp_max6675.c</FilePath>
+            </File>
+            <File>
               <FileName>bsp_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Application\bsp\src\bsp_i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\bsp\src\bsp_spi.c</FilePath>
             </File>
             <File>
               <FileName>bsp_isr.c</FileName>

@@ -67,7 +67,7 @@ void EEPROM_WriteBuffer(uint8_t* pBuffer,uint16_t WriteAddress,uint8_t NumByteTo
   uint8_t NumOfPage=0,NumOfSingle=0; //,count=0
   uint16_t Part=0;//
   
-  /*******ÅĞ¶ÏÆğÊ¼µØÖ·ÊÇ·ñ¿çÒ³Æ¬Çø******/
+  /*******åˆ¤æ–­èµ·å§‹åœ°å€æ˜¯å¦è·¨é¡µç‰‡åŒº******/
   Part=WriteAddress/PAGE_SIZE;
   if(Part!=0)
     Part=PAGE_SIZE*(Part+1)-WriteAddress;      
@@ -111,7 +111,7 @@ uint8_t* EEPROM_WritePage(uint8_t *pBuffer,uint16_t WriteAddr,uint8_t NumByteToW
 {
   /*send Start condition,test on EV5 and clear it*/
   I2C_Start();
-  if(I2C_CRR == (I2C_SendByte(WriteAddress_EEPROM)))  //·¢ËÍĞ´ÃüÁî²¢¼ì²éÓ¦´ğÎ»
+  if(I2C_CRR == (I2C_SendByte(WriteAddress_EEPROM)))  //å‘é€å†™å‘½ä»¤å¹¶æ£€æŸ¥åº”ç­”ä½
   {
     /******writeAddress for 8bit or 16 bit**********/
   #if (EEPROM<32)
@@ -149,7 +149,7 @@ uint8_t* EEPROM_ReadPage(uint8_t *pBuffer,uint8_t WriteAddr,uint8_t NumByteToWri
   /*send Start condition,test on EV5 and clear it*/
   I2C_Start();
   /*send Part Address for write,test on EV6 and clear it*/
-  if(I2C_CRR == (I2C_SendByte(WriteAddress_EEPROM)))  //·¢ËÍĞ´ÃüÁî²¢¼ì²éÓ¦´ğÎ»
+  if(I2C_CRR == (I2C_SendByte(WriteAddress_EEPROM)))  //å‘é€å†™å‘½ä»¤å¹¶æ£€æŸ¥åº”ç­”ä½
   {
 
     /*send the EEPROM's internal address,test on EV8 and clear it
@@ -173,9 +173,9 @@ uint8_t* EEPROM_ReadPage(uint8_t *pBuffer,uint8_t WriteAddr,uint8_t NumByteToWri
       *pBuffer=I2C_ReceiveByte();
       pBuffer++;
       if(NumByteToWrite == 0)
-        I2C_SendAck(1);  //·¢ËÍ·ÇÓ¦´ğĞÅºÅ
+        I2C_SendAck(1);  //å‘é€éåº”ç­”ä¿¡å·
       else
-        I2C_SendAck(0);  //·¢ËÍÓ¦´ğĞÅºÅ
+        I2C_SendAck(0);  //å‘é€åº”ç­”ä¿¡å·
     }
     I2C_Stop();	
    return pBuffer;

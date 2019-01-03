@@ -7,7 +7,7 @@ typedef enum { CS = 0, SCK, MISO, MOSI}SPI_GPIO_Typedef;
 #define  SPI_Mode2  2  //CPOL = 1, CPHA = 0,
 #define  SPI_Mode3  3  //CPOL = 1, CPHA = 1,
 
-//定义SPI接口
+//瀹氫箟SPI鎺ュ彛
 #define SPI_MODE  SPI_Mode0
 GPIO_TypeDef *SPI_Port[4] = 
 {

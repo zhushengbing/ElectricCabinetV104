@@ -12,6 +12,17 @@ struct DWIN_Params_Tags DWIN_Params_Info;
  * @author: mark.zhu
  * @param:
  * @function:
+ *************************************************/
+void DWIN_Delay(void)
+{
+	uint16_t u16Num = 1000;
+	while(u16Num--);
+}
+
+/*************************************************
+ * @author: mark.zhu
+ * @param:
+ * @function:
 *************************************************/
 uint16_t Bsp_DWIN_SWAP_Data(uint16_t data)
 {
@@ -52,7 +63,7 @@ void Bsp_DWIN_WriteRegs(uint8_t regID, uint16_t data)
 {
 	uint8_t cmd[7] = {0x5A, 0xA5, 0x04, 0x80, regID, data>>8, data};
 	Bsp_USART_Send(&HAL_DWIN_USART, cmd, 7);
-  osDelay(10);
+  DWIN_Delay();
 }
 
 /*************************************************
@@ -86,6 +97,7 @@ void Bsp_DWIN_WriteVariable(uint16_t varID, void *data, uint8_t len, uint8_t swa
 	}
 	cmd[2] = 3 + len;
 	Bsp_USART_Send(&HAL_DWIN_USART, cmd, len+6);
+	DWIN_Delay();
 }
 
 /*************************************************
@@ -97,7 +109,7 @@ void Bsp_DWIN_ReadVariable(uint16_t varID, uint8_t len)
 {
 	uint8_t cmd[7] = {0x5A, 0xA5, 0x04, 0x83, varID>>8, varID, len};
 	Bsp_USART_Send(&HAL_DWIN_USART, cmd, 8);
-  osDelay(10);
+	DWIN_Delay();
 }
 
 /*************************************************
@@ -120,7 +132,7 @@ void Bsp_DWIN_GetRealTime(void)
 {
 	uint8_t cmd[6] = {0x5A, 0xA5, 0x03, 0x81, 0x20, 0x07};
 	Bsp_USART_Send(&HAL_DWIN_USART, cmd, 6);
-  osDelay(10);
+  DWIN_Delay();
 }
 
 /*************************************************
@@ -132,9 +144,9 @@ void Bsp_DWIN_Rev_Process(void)
 {
 	if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Header != 0xA55A)return;
 	
-	if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Opcode == 0x81)//¶ÁÈ¡µ½µÄÊı¾İÊÇ¼Ä´æÆ÷Êı¾İ
+	if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Opcode == 0x81)//è¯»å–åˆ°çš„æ•°æ®æ˜¯å¯„å­˜å™¨æ•°æ®
 	{
-		//ÊµÊ±Ê±¼ä¶ÁÈ¡
+		//å®æ—¶æ—¶é—´è¯»å–
 		if(DWIN_Params_Info.DWIN_Rev.Buffer.RegBit.Addr == Reg_CLOCK)
 		{
 			Device_Params_Info.RTCInfo.Year = DWIN_Params_Info.DWIN_Rev.Buffer.Data[6];
@@ -146,10 +158,9 @@ void Bsp_DWIN_Rev_Process(void)
 			Device_Params_Info.RTCInfo.Second = DWIN_Params_Info.DWIN_Rev.Buffer.Data[12];
 		}
 	}
-	else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Opcode == 0x83)//¶ÁÈ¡µ½µÄÊı¾İÊÇ±äÁ¿Êı¾İ
+	else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Opcode == 0x83)//è¯»å–åˆ°çš„æ•°æ®æ˜¯å˜é‡æ•°æ®
 	{
-		uint8_t isupdate = 0;
-		//°´¼ü²Ù×÷
+		//æŒ‰é”®æ“ä½œ
 		if( DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr <=  Bsp_DWIN_SWAP_Data(KEY_PAGE11))
 		{
 			uint16_t key_value;
@@ -157,7 +168,7 @@ void Bsp_DWIN_Rev_Process(void)
 			page_id = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr);
 			key_value = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData);
       if(page_id < 12)
-        isupdate = PageKey_Process[page_id](key_value);
+        PageKey_Process[page_id](key_value);
 		}
 		else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr ==  Bsp_DWIN_SWAP_Data(STR_MANAGER_PWD))
 		{
@@ -175,7 +186,6 @@ void Bsp_DWIN_Rev_Process(void)
 		{
 			Device_Params_Info.EEPROM_Data.MT_Air = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData);
 			Device_Params_Info.EEPROM_Data.MT_Water = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData1);
-			Device_Params_Info.EEPROM_Update = 1;
 			Bsp_DWIN_SelectPage(PAGE0);
 		}
 		else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr ==  Bsp_DWIN_SWAP_Data(NUM_GETHOT_ONTIMING_HOUR1))
@@ -184,7 +194,6 @@ void Bsp_DWIN_Rev_Process(void)
 			Device_Params_Info.EEPROM_Data.GetHotTiming_ON[0].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData1);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[0].Hour = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData2);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[0].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData3);
-			Device_Params_Info.EEPROM_Update = 1;
 		}
     else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr ==  Bsp_DWIN_SWAP_Data(NUM_GETHOT_ONTIMING_HOUR2))
 		{
@@ -192,7 +201,6 @@ void Bsp_DWIN_Rev_Process(void)
 			Device_Params_Info.EEPROM_Data.GetHotTiming_ON[1].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData1);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[1].Hour = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData2);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[1].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData3);
-			Device_Params_Info.EEPROM_Update = 1;
 		}
     else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr ==  Bsp_DWIN_SWAP_Data(NUM_GETHOT_ONTIMING_HOUR3))
 		{
@@ -200,7 +208,6 @@ void Bsp_DWIN_Rev_Process(void)
 			Device_Params_Info.EEPROM_Data.GetHotTiming_ON[2].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData1);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[2].Hour = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData2);
 			Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[2].Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData3);
-			Device_Params_Info.EEPROM_Update = 1;
 		}
 		else if(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.Addr ==  Bsp_DWIN_SWAP_Data(NUM_PUTHOT_ONTIMING_HOUR))
 		{
@@ -208,11 +215,6 @@ void Bsp_DWIN_Rev_Process(void)
 			Device_Params_Info.EEPROM_Data.PutHotTiming_ON.Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData1);
 			Device_Params_Info.EEPROM_Data.PutHotTiming_OFF.Hour = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData2);
 			Device_Params_Info.EEPROM_Data.PutHotTiming_OFF.Minute = Bsp_DWIN_SWAP_Data(DWIN_Params_Info.DWIN_Rev.Buffer.VarBit.VarData3);
-			Device_Params_Info.EEPROM_Update = 1;
-		}
-		if(isupdate)
-		{
-			Bsp_GUI_Update();
 		}
 	}
 }

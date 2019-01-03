@@ -50,6 +50,7 @@
 #include "bsp_init.h"
 #include "bsp_dev.h"
 #include "bsp_func.h"
+#include "bsp_sensor.h"
 #include "cmsis_os.h"
 
 /* Private variables ---------------------------------------------------------*/
@@ -102,7 +103,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of DWIN_ReceiveTas */
-  osThreadDef(DWIN_ReceiveTas, StartDWIN_ReceiveTask, osPriorityHigh, 0, 128);
+  osThreadDef(DWIN_ReceiveTas, StartDWIN_ReceiveTask, osPriorityAboveNormal, 0, 128);
   DWIN_ReceiveTasHandle = osThreadCreate(osThread(DWIN_ReceiveTas), NULL);
 
   /* definition and creation of WIFI_ReceiveTas */
@@ -148,16 +149,12 @@ int main(void)
 /* StartDWIN_ReceiveTask */
 void StartDWIN_ReceiveTask(void const * argument)
 {
-	int ret;
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-		ret = osSemaphoreWait(DWIN_ReciveSemHandle, 1000);
-		if(ret > 0)
-			Bsp_GUI_Update();
-		else if(ret == 0)
-			Bsp_DWIN_Rev_Process();
+		osSemaphoreWait(DWIN_ReciveSemHandle, osWaitForever);
+		Bsp_DWIN_Rev_Process();
   }
   /* USER CODE END 5 */ 
 }
@@ -180,7 +177,9 @@ void StartmainFuncTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-//    Bsp_Sensor_GetTemperature();
+		Bsp_Sensor_GetInWaterTemperature();
+		Bsp_Sensor_GetOutWaterTemperature();
+		Bsp_Sensor_GetDeviceTemperature();
 		Bsp_Func_GetRealTime();
 		Bsp_Func_Timer();
     Bsp_Func_Special_Mode();
@@ -188,7 +187,6 @@ void StartmainFuncTask(void const * argument)
 		Bsp_Func_PutHot_Process();
 		Bsp_Func_GetHot_Process();
 		Bsp_MainFunc_Process();
-    Bsp_Func_EEPROM_Update();
 		osDelay(900);
   }
   /* USER CODE END StartmainFuncTask */
@@ -201,7 +199,9 @@ void StartDWIN_GuiTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		Bsp_GUI_Update();
+		Bsp_Func_EEPROM_Update();
+    osDelay(100);
   }
   /* USER CODE END StartDWIN_GuiTask */
 }

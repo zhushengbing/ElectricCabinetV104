@@ -1,5 +1,6 @@
 #include "bsp_init.h"
 #include "bsp_dev.h"
+#include "bsp_eeprom.h"
 
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef HAL_K1_SPI;
@@ -66,55 +67,54 @@ static void Bsp_SystemClock_Init(void)
   HAL_NVIC_SetPriority(SysTick_IRQn, 3, 0);
 }
 
-static void Bsp_K1_SPI_Init(void)
-{
+//static void Bsp_K1_SPI_Init(void)
+//{
+//  /* SPI1 parameter configuration*/
+//  HAL_K1_SPI.Instance = SPI1;
+//  HAL_K1_SPI.Init.Mode = SPI_MODE_MASTER;
+//  HAL_K1_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
+//  HAL_K1_SPI.Init.DataSize = SPI_DATASIZE_8BIT;
+//  HAL_K1_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
+//  HAL_K1_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
+//  HAL_K1_SPI.Init.NSS = SPI_NSS_SOFT;
+//  HAL_K1_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+//  HAL_K1_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
+//  HAL_K1_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
+//  HAL_K1_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+//  HAL_K1_SPI.Init.CRCPolynomial = 7;
+//  HAL_K1_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+//  HAL_K1_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+//  if (HAL_SPI_Init(&HAL_K1_SPI) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
 
-  /* SPI1 parameter configuration*/
-  HAL_K1_SPI.Instance = SPI1;
-  HAL_K1_SPI.Init.Mode = SPI_MODE_MASTER;
-  HAL_K1_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
-  HAL_K1_SPI.Init.DataSize = SPI_DATASIZE_4BIT;
-  HAL_K1_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
-  HAL_K1_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
-  HAL_K1_SPI.Init.NSS = SPI_NSS_SOFT;
-  HAL_K1_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-  HAL_K1_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  HAL_K1_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
-  HAL_K1_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  HAL_K1_SPI.Init.CRCPolynomial = 7;
-  HAL_K1_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  HAL_K1_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  if (HAL_SPI_Init(&HAL_K1_SPI) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+//}
 
-}
+//static void Bsp_K3_SPI_Init(void)
+//{
 
-static void Bsp_K3_SPI_Init(void)
-{
+//  /* SPI2 parameter configuration*/
+//  HAL_K3_SPI.Instance = SPI2;
+//  HAL_K3_SPI.Init.Mode = SPI_MODE_MASTER;
+//  HAL_K3_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
+//  HAL_K3_SPI.Init.DataSize = SPI_DATASIZE_4BIT;
+//  HAL_K3_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
+//  HAL_K3_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
+//  HAL_K3_SPI.Init.NSS = SPI_NSS_SOFT;
+//  HAL_K3_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+//  HAL_K3_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
+//  HAL_K3_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
+//  HAL_K3_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+//  HAL_K3_SPI.Init.CRCPolynomial = 7;
+//  HAL_K3_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
+//  HAL_K3_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
+//  if (HAL_SPI_Init(&HAL_K3_SPI) != HAL_OK)
+//  {
+//    _Error_Handler(__FILE__, __LINE__);
+//  }
 
-  /* SPI2 parameter configuration*/
-  HAL_K3_SPI.Instance = SPI2;
-  HAL_K3_SPI.Init.Mode = SPI_MODE_MASTER;
-  HAL_K3_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
-  HAL_K3_SPI.Init.DataSize = SPI_DATASIZE_4BIT;
-  HAL_K3_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
-  HAL_K3_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
-  HAL_K3_SPI.Init.NSS = SPI_NSS_SOFT;
-  HAL_K3_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-  HAL_K3_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  HAL_K3_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
-  HAL_K3_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  HAL_K3_SPI.Init.CRCPolynomial = 7;
-  HAL_K3_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-  HAL_K3_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-  if (HAL_SPI_Init(&HAL_K3_SPI) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
-}
+//}
 
 /* TIM6 init function */
 static void Bsp_BaseTime_Init(void)
@@ -212,56 +212,111 @@ static void Bsp_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, EEPROM_SCL_Pin|EEPROM_SDA_Pin|HEATERROD2_Pin|HEATERROD3_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(EEPROM_SCL_GPIO_Port, EEPROM_SCL_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(EEPROM_SDA_GPIO_Port, EEPROM_SDA_Pin, GPIO_PIN_SET);
+	
+	HAL_GPIO_WritePin(HEATERROD1_GPIO_Port, HEATERROD1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(HEATERROD2_GPIO_Port, HEATERROD2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(HEATERROD3_GPIO_Port, HEATERROD3_Pin, GPIO_PIN_RESET);
+	
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(WIFI_KEY_GPIO_Port, WIFI_KEY_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, WIFI_KEY_Pin|HEATERROD1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, FAN_HIGH_Pin|FAN_MID_Pin|FAN_LOW_Pin|MOTOR_AIR_Pin 
-                          |MOTOR_WATER_Pin|K3_CS_Pin|K2_CS_Pin|K2_SCK_Pin 
-                          |K2_MISO_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(K1_CS_GPIO_Port, K1_CS_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FAN_HIGH_GPIO_Port, FAN_HIGH_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(FAN_MID_GPIO_Port, FAN_MID_Pin, GPIO_PIN_RESET);												
+	HAL_GPIO_WritePin(FAN_LOW_GPIO_Port, FAN_LOW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_AIR_GPIO_Port, MOTOR_AIR_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(MOTOR_WATER_GPIO_Port, MOTOR_WATER_Pin, GPIO_PIN_RESET);
+	/*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(K1_CS_GPIO_Port, K1_CS_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(K2_CS_GPIO_Port, K2_CS_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(K3_CS_GPIO_Port, K3_CS_Pin, GPIO_PIN_SET);
+	
+	HAL_GPIO_WritePin(K1_SCK_GPIO_Port, K1_SCK_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(K2_SCK_GPIO_Port, K2_SCK_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(K3_SCK_GPIO_Port, K3_SCK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : EEPROM_SCL_Pin EEPROM_SDA_Pin HEATERROD2_Pin HEATERROD3_Pin */
-  GPIO_InitStruct.Pin = EEPROM_SCL_Pin|EEPROM_SDA_Pin|HEATERROD2_Pin|HEATERROD3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pin = EEPROM_SCL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
+  HAL_GPIO_Init(EEPROM_SCL_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = EEPROM_SDA_Pin;
+  HAL_GPIO_Init(EEPROM_SDA_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K1_CS_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(K1_CS_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K2_CS_Pin;
+  HAL_GPIO_Init(K2_CS_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K3_CS_Pin;
+  HAL_GPIO_Init(K3_CS_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K1_SCK_Pin;
+	HAL_GPIO_Init(K3_SCK_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K2_SCK_Pin;
+  HAL_GPIO_Init(K2_SCK_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K3_SCK_Pin;
+  HAL_GPIO_Init(K3_SCK_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = FAN_HIGH_Pin;
+  HAL_GPIO_Init(FAN_HIGH_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = FAN_MID_Pin;
+  HAL_GPIO_Init(FAN_MID_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = FAN_LOW_Pin;
+  HAL_GPIO_Init(FAN_LOW_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = MOTOR_AIR_Pin;
+  HAL_GPIO_Init(MOTOR_AIR_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = MOTOR_WATER_Pin;
+  HAL_GPIO_Init(MOTOR_WATER_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = HEATERROD1_Pin;
+  HAL_GPIO_Init(HEATERROD1_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = HEATERROD2_Pin;
+  HAL_GPIO_Init(HEATERROD3_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = HEATERROD3_Pin;
+  HAL_GPIO_Init(HEATERROD3_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = WIFI_KEY_Pin;
+  HAL_GPIO_Init(WIFI_KEY_GPIO_Port, &GPIO_InitStruct);
   /*Configure GPIO pins : WIFI_STATE_Pin ALARM_HEAT_Pin ALARM_WATER_Pin */
-  GPIO_InitStruct.Pin = WIFI_STATE_Pin|ALARM_HEAT_Pin|ALARM_WATER_Pin;
+  GPIO_InitStruct.Pin = WIFI_STATE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : WIFI_KEY_Pin HEATERROD1_Pin */
-  GPIO_InitStruct.Pin = WIFI_KEY_Pin|HEATERROD1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : FAN_HIGH_Pin FAN_MID_Pin FAN_LOW_Pin MOTOR_AIR_Pin 
-                           MOTOR_WATER_Pin K3_CS_Pin K2_CS_Pin K2_SCK_Pin 
-                           K2_MISO_Pin */
-  GPIO_InitStruct.Pin = FAN_HIGH_Pin|FAN_MID_Pin|FAN_LOW_Pin|MOTOR_AIR_Pin 
-                          |MOTOR_WATER_Pin|K3_CS_Pin|K2_CS_Pin|K2_SCK_Pin 
-                          |K2_MISO_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : K1_CS_Pin */
-  GPIO_InitStruct.Pin = K1_CS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(K1_CS_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(WIFI_STATE_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = ALARM_WATER_Pin;
+  HAL_GPIO_Init(ALARM_WATER_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K1_MISO_Pin;
+	HAL_GPIO_Init(K1_MISO_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K2_MISO_Pin;
+	HAL_GPIO_Init(K2_MISO_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = K3_MISO_Pin;
+	HAL_GPIO_Init(K3_MISO_GPIO_Port, &GPIO_InitStruct);
+	
+	GPIO_InitStruct.Pin = ALARM_HEAT_Pin;
+//	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+//  GPIO_InitStruct.Pull = GPIO_NOPULL;
+//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(ALARM_HEAT_GPIO_Port, &GPIO_InitStruct);
 
 }
 
@@ -276,7 +331,38 @@ void Bsp_USART_Send(UART_HandleTypeDef *huart ,uint8_t *pdata, uint16_t len)
 
 void Bsp_Params_Init(void)
 {
-  
+  EEPROM_Read((uint8_t*)&Device_Params_Info.EEPROM_Data.EEPROM_Key, 0, 4);
+  if(Device_Params_Info.EEPROM_Data.EEPROM_Key != 0x12345679)
+	{
+		uint8_t i;
+		Device_Params_Info.EEPROM_Data.EEPROM_Key = 0x12345679;
+		Device_Params_Info.EEPROM_Data.TT_Water = 50;
+		Device_Params_Info.EEPROM_Data.MT_Water = 65;
+		Device_Params_Info.EEPROM_Data.MT_Air = 650;
+		Device_Params_Info.EEPROM_Data.Timer_Bucket.All = 0x7F;
+		
+    for(i=0; i<3; i++)
+    {
+      Device_Params_Info.EEPROM_Data.GetHotTiming_ON[i].Hour = 23;
+      Device_Params_Info.EEPROM_Data.GetHotTiming_ON[i].Minute = 0;
+      Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[i].Hour = 7;
+      Device_Params_Info.EEPROM_Data.GetHotTiming_OFF[i].Minute = 0;
+    }
+		
+		Device_Params_Info.EEPROM_Data.PutHotTiming_ON.Hour = 7;
+		Device_Params_Info.EEPROM_Data.PutHotTiming_ON.Minute = 0;	
+		Device_Params_Info.EEPROM_Data.PutHotTiming_OFF.Hour = 23;
+		Device_Params_Info.EEPROM_Data.PutHotTiming_OFF.Minute = 0;
+		
+		Device_Params_Info.EEPROM_Data.Device_Status.All = 0;
+    EEPROM_Write((uint8_t*)&Device_Params_Info.EEPROM_Data.EEPROM_Key, 0, sizeof(struct EEPROM_Data_Tags));
+	}
+	else
+    EEPROM_Read((uint8_t*)&Device_Params_Info.EEPROM_Data.EEPROM_Key, 0, sizeof(struct EEPROM_Data_Tags));
+	
+	Device_Params_Info.EEPROM_Data.Device_Status.All &= ~0x30;
+	Device_Params_Info.PreTimer_Bucket.All = Device_Params_Info.EEPROM_Data.Timer_Bucket.All;
+  Device_Params_Info.Special_Mode.HoldingTime = -1;
 }
 
 void Bsp_Peripherals_Init(void)
@@ -288,7 +374,8 @@ void Bsp_Peripherals_Init(void)
   Bsp_DWIN_USART_Init();
   Bsp_WIFI_USART_Init();
   Bsp_RS485_USART_Init();
-  Bsp_K1_SPI_Init();
-  Bsp_K3_SPI_Init();
+//  Bsp_K1_SPI_Init();
+//  Bsp_K3_SPI_Init();
   Bsp_Params_Init();
+	HAL_Delay(1000);
 }

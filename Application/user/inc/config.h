@@ -56,70 +56,102 @@
 /* USER CODE BEGIN Includes */
 #define EN_WATCHDOG   1
 #define SPECIAL_TEMP  200
+#define TIMER_WEEK    1
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
-#define EEPROM_SCL_Pin GPIO_PIN_2
-#define EEPROM_SCL_GPIO_Port GPIOC
-#define EEPROM_SDA_Pin GPIO_PIN_3
-#define EEPROM_SDA_GPIO_Port GPIOC
-#define RS485_DE_Pin GPIO_PIN_1
-#define RS485_DE_GPIO_Port GPIOA
-#define RS485_TX_Pin GPIO_PIN_2
-#define RS485_TX_GPIO_Port GPIOA
-#define RS485_RX_Pin GPIO_PIN_3
-#define RS485_RX_GPIO_Port GPIOA
-#define WIFI_STATE_Pin GPIO_PIN_6
-#define WIFI_STATE_GPIO_Port GPIOA
-#define WIFI_KEY_Pin GPIO_PIN_7
-#define WIFI_KEY_GPIO_Port GPIOA
-#define WIFI_TX_Pin GPIO_PIN_4
-#define WIFI_TX_GPIO_Port GPIOC
-#define WIFI_RX_Pin GPIO_PIN_5
-#define WIFI_RX_GPIO_Port GPIOC
-#define FAN_HIGH_Pin GPIO_PIN_0
-#define FAN_HIGH_GPIO_Port GPIOB
-#define FAN_MID_Pin GPIO_PIN_1
-#define FAN_MID_GPIO_Port GPIOB
-#define FAN_LOW_Pin GPIO_PIN_2
-#define FAN_LOW_GPIO_Port GPIOB
-#define MOTOR_AIR_Pin GPIO_PIN_10
-#define MOTOR_AIR_GPIO_Port GPIOB
-#define MOTOR_WATER_Pin GPIO_PIN_11
+typedef enum{FALSE = 0, TRUE = !FALSE}bool;
+
+#define EEPROM_SCL_Pin        GPIO_PIN_2
+#define EEPROM_SCL_GPIO_Port  GPIOC
+
+#define EEPROM_SDA_Pin        GPIO_PIN_3
+#define EEPROM_SDA_GPIO_Port  GPIOC
+
+#define RS485_DE_Pin          GPIO_PIN_1
+#define RS485_DE_GPIO_Port    GPIOA
+
+#define RS485_TX_Pin          GPIO_PIN_2
+#define RS485_TX_GPIO_Port    GPIOA
+
+#define RS485_RX_Pin          GPIO_PIN_3
+#define RS485_RX_GPIO_Port    GPIOA
+
+#define WIFI_STATE_Pin        GPIO_PIN_6
+#define WIFI_STATE_GPIO_Port  GPIOA
+
+#define WIFI_KEY_Pin          GPIO_PIN_7
+#define WIFI_KEY_GPIO_Port    GPIOA
+
+#define WIFI_TX_Pin           GPIO_PIN_4
+#define WIFI_TX_GPIO_Port     GPIOC
+
+#define WIFI_RX_Pin           GPIO_PIN_5
+#define WIFI_RX_GPIO_Port     GPIOC
+
+#define FAN_HIGH_Pin          GPIO_PIN_0
+#define FAN_HIGH_GPIO_Port    GPIOB
+
+#define FAN_MID_Pin           GPIO_PIN_1
+#define FAN_MID_GPIO_Port     GPIOB
+
+#define FAN_LOW_Pin           GPIO_PIN_2
+#define FAN_LOW_GPIO_Port     GPIOB
+
+#define MOTOR_AIR_Pin         GPIO_PIN_10
+#define MOTOR_AIR_GPIO_Port   GPIOB
+
+#define MOTOR_WATER_Pin       GPIO_PIN_11
 #define MOTOR_WATER_GPIO_Port GPIOB
-#define K3_CS_Pin GPIO_PIN_12
-#define K3_CS_GPIO_Port GPIOB
-#define K3_SCK_Pin GPIO_PIN_13
-#define K3_SCK_GPIO_Port GPIOB
-#define K3_MISO_Pin GPIO_PIN_14
-#define K3_MISO_GPIO_Port GPIOB
-#define DWIN_TX_Pin GPIO_PIN_9
-#define DWIN_TX_GPIO_Port GPIOA
-#define DWIN_RX_Pin GPIO_PIN_10
-#define DWIN_RX_GPIO_Port GPIOA
-#define ALARM_HEAT_Pin GPIO_PIN_11
-#define ALARM_HEAT_GPIO_Port GPIOA
-#define ALARM_WATER_Pin GPIO_PIN_12
+
+#define K3_CS_Pin             GPIO_PIN_12
+#define K3_CS_GPIO_Port       GPIOB
+
+#define K3_SCK_Pin            GPIO_PIN_13
+#define K3_SCK_GPIO_Port      GPIOB
+
+#define K3_MISO_Pin           GPIO_PIN_14
+#define K3_MISO_GPIO_Port     GPIOB
+
+#define DWIN_TX_Pin           GPIO_PIN_9
+#define DWIN_TX_GPIO_Port     GPIOA
+
+#define DWIN_RX_Pin           GPIO_PIN_10
+#define DWIN_RX_GPIO_Port     GPIOA
+
+#define ALARM_HEAT_Pin        GPIO_PIN_11
+#define ALARM_HEAT_GPIO_Port  GPIOA
+
+#define ALARM_WATER_Pin       GPIO_PIN_12
 #define ALARM_WATER_GPIO_Port GPIOA
-#define HEATERROD1_Pin GPIO_PIN_15
-#define HEATERROD1_GPIO_Port GPIOA
-#define HEATERROD2_Pin GPIO_PIN_10
-#define HEATERROD2_GPIO_Port GPIOC
-#define HEATERROD3_Pin GPIO_PIN_11
-#define HEATERROD3_GPIO_Port GPIOC
-#define K1_CS_Pin GPIO_PIN_2
-#define K1_CS_GPIO_Port GPIOD
-#define K1_SCK_Pin GPIO_PIN_3
-#define K1_SCK_GPIO_Port GPIOB
-#define K1_MISO_Pin GPIO_PIN_4
-#define K1_MISO_GPIO_Port GPIOB
-#define K2_CS_Pin GPIO_PIN_5
-#define K2_CS_GPIO_Port GPIOB
-#define K2_SCK_Pin GPIO_PIN_6
-#define K2_SCK_GPIO_Port GPIOB
-#define K2_MISO_Pin GPIO_PIN_7
-#define K2_MISO_GPIO_Port GPIOB
+
+#define HEATERROD1_Pin        GPIO_PIN_15
+#define HEATERROD1_GPIO_Port  GPIOA
+
+#define HEATERROD2_Pin        GPIO_PIN_10
+#define HEATERROD2_GPIO_Port  GPIOC
+
+#define HEATERROD3_Pin        GPIO_PIN_11
+#define HEATERROD3_GPIO_Port  GPIOC
+
+#define K1_CS_Pin             GPIO_PIN_2
+#define K1_CS_GPIO_Port       GPIOD
+
+#define K1_SCK_Pin            GPIO_PIN_3
+#define K1_SCK_GPIO_Port      GPIOB
+
+#define K1_MISO_Pin           GPIO_PIN_4
+#define K1_MISO_GPIO_Port     GPIOB
+
+#define K2_CS_Pin             GPIO_PIN_5
+#define K2_CS_GPIO_Port       GPIOB
+
+#define K2_SCK_Pin            GPIO_PIN_6
+#define K2_SCK_GPIO_Port      GPIOB
+
+#define K2_MISO_Pin           GPIO_PIN_7
+#define K2_MISO_GPIO_Port     GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**

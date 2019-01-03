@@ -70,7 +70,8 @@
 	#define KEY_PAGE3_OFF_HOUR_DOWN  (uint16_t)0x0009
 	#define KEY_PAGE3_OFF_MIN_UP     (uint16_t)0x000A
 	#define KEY_PAGE3_OFF_MIN_DOWN   (uint16_t)0x000B
-//	#define KEY_PAGE3_TIMING_SAVE    (uint16_t)0x000C
+	#define KEY_PAGE3_TIMING_SAVE    (uint16_t)0x000C
+#if TIMER_WEEK
 	#define KEY_PAGE3_WEEK1          (uint16_t)0x000D
 	#define KEY_PAGE3_WEEK2          (uint16_t)0x000E
 	#define KEY_PAGE3_WEEK3          (uint16_t)0x000F
@@ -79,6 +80,7 @@
 	#define KEY_PAGE3_WEEK6          (uint16_t)0x0012
 	#define KEY_PAGE3_WEEK7          (uint16_t)0x0013
 	#define KEY_PAGE3_WEEK_SAVE      (uint16_t)0x0014
+#endif
 	#define KEY_PAGE3_TIMER_ENABLE   (uint16_t)0x0015
   #define KEY_PAGE3_TIM1_ENABLE    (uint16_t)0x0016
   #define KEY_PAGE3_TIM2_ENABLE    (uint16_t)0x0017
@@ -101,6 +103,7 @@
 	#define KEY_PAGE4_OFF_MIN_UP     (uint16_t)0x000A
 	#define KEY_PAGE4_OFF_MIN_DOWN   (uint16_t)0x000B
 	#define KEY_PAGE4_TIMING_SAVE    (uint16_t)0x000C
+#if TIMER_WEEK
 	#define KEY_PAGE4_WEEK1          (uint16_t)0x000D
 	#define KEY_PAGE4_WEEK2          (uint16_t)0x000E
 	#define KEY_PAGE4_WEEK3          (uint16_t)0x000F
@@ -109,6 +112,7 @@
 	#define KEY_PAGE4_WEEK6          (uint16_t)0x0012
 	#define KEY_PAGE4_WEEK7          (uint16_t)0x0013
 	#define KEY_PAGE4_WEEK_SAVE      (uint16_t)0x0014
+#endif
 	#define KEY_PAGE4_TIMER_ENABLE   (uint16_t)0x0015
 
 #define KEY_PAGE5                    (uint16_t)0x0005
@@ -142,11 +146,12 @@
 #define KEY_PAGE11                   (uint16_t)0x000B
 	#define KEY_PAGE11_RETURN       (uint16_t)0x0000
 
-#define NUM_RTWATER                  (uint16_t)0x0020
+#define NUM_RTOUTWATER               (uint16_t)0x0020
 #define NUM_RTAIR                    (uint16_t)0x0021
 #define NUM_TTWATER                  (uint16_t)0x0022
 #define NUM_MAXAIR                   (uint16_t)0x0023
 #define NUM_MAXWATER                 (uint16_t)0x0024
+#define NUM_RTINWATER                (uint16_t)0x0025
 
 #define NUM_GETHOT_ONTIMING_HOUR1    (uint16_t)0x0030
 #define NUM_GETHOT_ONTIMING_MINUTE1  (uint16_t)0x0031
@@ -198,7 +203,9 @@ union DWIN_Icon_Status_Tags
 		uint8_t   TimmingKey_Bit         :1;
 		uint8_t   GetHotPicture_Bit      :1;
 		uint8_t   PutHotPicture_Bit      :1;
-		uint8_t   GetHotLevelPicture_Bit :3;
+		uint8_t   GetHotLevel1Picture_Bit:1;
+		uint8_t   GetHotLevel2Picture_Bit:1;
+		uint8_t   GetHotLevel3Picture_Bit:1;
 		uint8_t   WaterAlarm_Bit         :1;
 		uint8_t   AirAlarm_Bit           :1;
 		uint8_t   GetHotTiming_Bit       :1;
