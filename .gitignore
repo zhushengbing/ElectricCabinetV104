@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+*.crf
+*.axf
+*.htm
+*.lnp
+*.sct
+*.dep
+*.iex
