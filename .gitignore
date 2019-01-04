@@ -50,6 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+MDK-ARM/ElectricCabinetV104/bsp_eeprom.crf
 *.crf
 *.axf
 *.htm
