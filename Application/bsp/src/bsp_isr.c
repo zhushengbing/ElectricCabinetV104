@@ -13,8 +13,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			DWIN_Params_Info.DWIN_Rev.LifeTime--;
 			if(DWIN_Params_Info.DWIN_Rev.LifeTime == 0)
 			{
+				if(DWIN_Params_Info.DWIN_Rev.Count > 3)
+					osSemaphoreRelease(DWIN_ReciveSemHandle);
 				DWIN_Params_Info.DWIN_Rev.Count = 0;
-				osSemaphoreRelease(DWIN_ReciveSemHandle);
 			}
 		}
 	}

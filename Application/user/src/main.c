@@ -55,17 +55,20 @@
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId DWIN_ReceiveTasHandle;
-osThreadId WIFI_ReceiveTasHandle;
+#if EN_WATCHDOG
+osThreadId WatchDogTasHandle;
+#endif
 osThreadId mainFuncTaskHandle;
 osThreadId DWIN_GuiTaskHandle;
 
 osSemaphoreId DWIN_ReciveSemHandle;
 osSemaphoreId DWIN_GuiSemHandle;
-osSemaphoreId WIFI_ReceiveSemHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void StartDWIN_ReceiveTask(void const * argument);
-void StartWIFI_ReceiveTask(void const * argument);
+#if EN_WATCHDOG
+void StartWatchDogTask(void const * argument);
+#endif
 void StartmainFuncTask(void const * argument);
 void StartDWIN_GuiTask(void const * argument);
 
@@ -89,10 +92,6 @@ int main(void)
   osSemaphoreDef(DWIN_GuiSem);
   DWIN_GuiSemHandle = osSemaphoreCreate(osSemaphore(DWIN_GuiSem), 1);
 
-  /* definition and creation of WIFI_ReceiveSem */
-  osSemaphoreDef(WIFI_ReceiveSem);
-  WIFI_ReceiveSemHandle = osSemaphoreCreate(osSemaphore(WIFI_ReceiveSem), 1);
-
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -106,16 +105,17 @@ int main(void)
   osThreadDef(DWIN_ReceiveTas, StartDWIN_ReceiveTask, osPriorityAboveNormal, 0, 128);
   DWIN_ReceiveTasHandle = osThreadCreate(osThread(DWIN_ReceiveTas), NULL);
 
+#if EN_WATCHDOG
   /* definition and creation of WIFI_ReceiveTas */
-  osThreadDef(WIFI_ReceiveTas, StartWIFI_ReceiveTask, osPriorityLow, 0, 128);
-  WIFI_ReceiveTasHandle = osThreadCreate(osThread(WIFI_ReceiveTas), NULL);
-
+  osThreadDef(WatchDogTas, StartWatchDogTask, osPriorityRealtime, 0, 128);
+  WatchDogTasHandle = osThreadCreate(osThread(WatchDogTas), NULL);
+#endif
   /* definition and creation of mainFuncTask */
-  osThreadDef(mainFuncTask, StartmainFuncTask, osPriorityNormal, 0, 128);
+  osThreadDef(mainFuncTask, StartmainFuncTask, osPriorityHigh, 0, 128);
   mainFuncTaskHandle = osThreadCreate(osThread(mainFuncTask), NULL);
 
   /* definition and creation of DWIN_GuiTask */
-  osThreadDef(DWIN_GuiTask, StartDWIN_GuiTask, osPriorityHigh, 0, 128);
+  osThreadDef(DWIN_GuiTask, StartDWIN_GuiTask, osPriorityNormal, 0, 128);
   DWIN_GuiTaskHandle = osThreadCreate(osThread(DWIN_GuiTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -158,17 +158,21 @@ void StartDWIN_ReceiveTask(void const * argument)
   }
   /* USER CODE END 5 */ 
 }
-/* StartWIFI_ReceiveTask */
-void StartWIFI_ReceiveTask(void const * argument)
+
+#if EN_WATCHDOG
+/* StartWatchDogTask */
+void StartWatchDogTask(void const * argument)
 {
-  /* USER CODE BEGIN StartWIFI_ReceiveTask */
+  /* USER CODE BEGIN StartWatchDogTask */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+		HAL_IWDG_Refresh(&HAL_WATCHDOG_IWDG);
+    osDelay(5);
   }
-  /* USER CODE END StartWIFI_ReceiveTask */
+  /* USER CODE END StartWatchDogTask */
 }
+#endif
 
 /* StartmainFuncTask */
 void StartmainFuncTask(void const * argument)

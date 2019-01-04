@@ -11,6 +11,9 @@ TIM_HandleTypeDef HAL_BaseTime_TIM;
 UART_HandleTypeDef HAL_DWIN_USART;
 UART_HandleTypeDef HAL_WIFI_USART;
 UART_HandleTypeDef HAL_RS485_USART;
+#if EN_WATCHDOG
+IWDG_HandleTypeDef HAL_WATCHDOG_IWDG;
+#endif
 
 struct Dev_Params_Tags Device_Params_Info;
 
@@ -66,55 +69,6 @@ static void Bsp_SystemClock_Init(void)
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 3, 0);
 }
-
-//static void Bsp_K1_SPI_Init(void)
-//{
-//  /* SPI1 parameter configuration*/
-//  HAL_K1_SPI.Instance = SPI1;
-//  HAL_K1_SPI.Init.Mode = SPI_MODE_MASTER;
-//  HAL_K1_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
-//  HAL_K1_SPI.Init.DataSize = SPI_DATASIZE_8BIT;
-//  HAL_K1_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
-//  HAL_K1_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
-//  HAL_K1_SPI.Init.NSS = SPI_NSS_SOFT;
-//  HAL_K1_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-//  HAL_K1_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
-//  HAL_K1_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
-//  HAL_K1_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-//  HAL_K1_SPI.Init.CRCPolynomial = 7;
-//  HAL_K1_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-//  HAL_K1_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-//  if (HAL_SPI_Init(&HAL_K1_SPI) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-
-//}
-
-//static void Bsp_K3_SPI_Init(void)
-//{
-
-//  /* SPI2 parameter configuration*/
-//  HAL_K3_SPI.Instance = SPI2;
-//  HAL_K3_SPI.Init.Mode = SPI_MODE_MASTER;
-//  HAL_K3_SPI.Init.Direction = SPI_DIRECTION_2LINES_RXONLY;
-//  HAL_K3_SPI.Init.DataSize = SPI_DATASIZE_4BIT;
-//  HAL_K3_SPI.Init.CLKPolarity = SPI_POLARITY_LOW;
-//  HAL_K3_SPI.Init.CLKPhase = SPI_PHASE_1EDGE;
-//  HAL_K3_SPI.Init.NSS = SPI_NSS_SOFT;
-//  HAL_K3_SPI.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
-//  HAL_K3_SPI.Init.FirstBit = SPI_FIRSTBIT_MSB;
-//  HAL_K3_SPI.Init.TIMode = SPI_TIMODE_DISABLE;
-//  HAL_K3_SPI.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-//  HAL_K3_SPI.Init.CRCPolynomial = 7;
-//  HAL_K3_SPI.Init.CRCLength = SPI_CRC_LENGTH_DATASIZE;
-//  HAL_K3_SPI.Init.NSSPMode = SPI_NSS_PULSE_ENABLE;
-//  if (HAL_SPI_Init(&HAL_K3_SPI) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-
-//}
 
 /* TIM6 init function */
 static void Bsp_BaseTime_Init(void)
@@ -313,12 +267,27 @@ static void Bsp_GPIO_Init(void)
 	HAL_GPIO_Init(K3_MISO_GPIO_Port, &GPIO_InitStruct);
 	
 	GPIO_InitStruct.Pin = ALARM_HEAT_Pin;
-//	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-//  GPIO_InitStruct.Pull = GPIO_NOPULL;
-//  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(ALARM_HEAT_GPIO_Port, &GPIO_InitStruct);
 
 }
+
+#if EN_WATCHDOG
+
+void Bsp_IWDG_Init(void)
+{
+	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET)
+		__HAL_RCC_CLEAR_RESET_FLAGS();
+	HAL_WATCHDOG_IWDG.Instance = IWDG;
+  HAL_WATCHDOG_IWDG.Init.Prescaler = IWDG_PRESCALER_256;
+  HAL_WATCHDOG_IWDG.Init.Window = IWDG_WINDOW_DISABLE;
+  HAL_WATCHDOG_IWDG.Init.Reload = 1874;
+  if (HAL_IWDG_Init(&HAL_WATCHDOG_IWDG) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	__HAL_IWDG_START(&HAL_WATCHDOG_IWDG);
+}
+#endif
 
 void Bsp_USART_Send(UART_HandleTypeDef *huart ,uint8_t *pdata, uint16_t len)
 {
@@ -360,7 +329,6 @@ void Bsp_Params_Init(void)
 	else
     EEPROM_Read((uint8_t*)&Device_Params_Info.EEPROM_Data.EEPROM_Key, 0, sizeof(struct EEPROM_Data_Tags));
 	
-	Device_Params_Info.EEPROM_Data.Device_Status.All &= ~0x30;
 	Device_Params_Info.PreTimer_Bucket.All = Device_Params_Info.EEPROM_Data.Timer_Bucket.All;
   Device_Params_Info.Special_Mode.HoldingTime = -1;
 }
@@ -374,8 +342,9 @@ void Bsp_Peripherals_Init(void)
   Bsp_DWIN_USART_Init();
   Bsp_WIFI_USART_Init();
   Bsp_RS485_USART_Init();
-//  Bsp_K1_SPI_Init();
-//  Bsp_K3_SPI_Init();
   Bsp_Params_Init();
 	HAL_Delay(1000);
+#if EN_WATCHDOG
+	Bsp_IWDG_Init();
+#endif
 }

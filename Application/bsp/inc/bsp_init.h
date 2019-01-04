@@ -8,6 +8,9 @@ extern TIM_HandleTypeDef HAL_BaseTime_TIM;
 extern UART_HandleTypeDef HAL_DWIN_USART;
 extern UART_HandleTypeDef HAL_WIFI_USART;
 extern UART_HandleTypeDef HAL_RS485_USART;
+#if EN_WATCHDOG
+extern IWDG_HandleTypeDef HAL_WATCHDOG_IWDG;
+#endif
 
 void Bsp_Peripherals_Init(void);
 void Bsp_USART_Send(UART_HandleTypeDef *huart ,uint8_t *pdata, uint16_t len);

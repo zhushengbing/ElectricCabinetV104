@@ -245,7 +245,7 @@ struct DWIN_Rev_Tag
 {
 	union Rev_Buf_Tags Buffer;
 	uint8_t  LifeTime;
-	uint8_t  Count;
+	uint16_t Count;
 };
 
 struct DWIN_Params_Tags
